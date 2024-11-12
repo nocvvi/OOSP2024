@@ -12,6 +12,7 @@ public class Main {
                 .withEmail("ivanov@mail.ru")
                 .withAge("20")
                 .build();
+
         User user1 = new UserBuilder()
                 .withLastName("Васичкин")
                 .withFirstName("Андрей")
