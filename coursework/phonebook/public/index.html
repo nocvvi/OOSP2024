@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Book</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f4f4f4;
+        }
+
+        button {
+            padding: 5px 10px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<h1>Phone Book</h1>
+<div>
+    <label>
+        Name:
+        <input type="text" id="name">
+    </label>
+    <label>
+        Phone:
+        <input type="text" id="phone">
+    </label>
+    <label>
+        Email:
+        <input type="email" id="email">
+    </label>
+    <button onclick="addContact()">Add Contact</button>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody id="contact-list"></tbody>
+</table>
+
+<script>
+    const apiUrl = "http://localhost:8080/contacts";
+
+    async function fetchContacts() {
+        const response = await fetch(apiUrl);
+        const contacts = await response.json();
+        const tbody = document.getElementById('contact-list');
+        tbody.innerHTML = '';
+
+        contacts.forEach(contact => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                    <td>${contact.id}</td>
+                    <td>${contact.name}</td>
+                    <td>${contact.phone}</td>
+                    <td>${contact.email}</td>
+                    <td>
+                        <button onclick="deleteContact(${contact.id})">Delete</button>
+                    </td>
+                `;
+            tbody.appendChild(row);
+        });
+    }
+
+    async function addContact() {
+        const name = document.getElementById('name').value;
+        const phone = document.getElementById('phone').value;
+        const email = document.getElementById('email').value;
+
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, phone, email })
+        });
+
+        if (response.ok) {
+            fetchContacts();
+            document.getElementById('name').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('email').value = '';
+        } else {
+            alert("Failed to add contact!");
+        }
+    }
+
+    async function deleteContact(id) {
+        const response = await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+        if (response.ok) {
+            fetchContacts();
+        } else {
+            alert("Failed to delete contact!");
+        }
+    }
+
+    // Загружаем контакты при старте
+    fetchContacts();
+</script>
+</body>
+</html>
